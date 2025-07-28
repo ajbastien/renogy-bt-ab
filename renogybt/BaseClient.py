@@ -52,6 +52,8 @@ class BaseClient:
             for dev in self.ble_manager.discovered_devices:
                 if dev.name != None and dev.name.startswith(tuple(ALIAS_PREFIXES)):
                     logging.info(f"Possible device found! ====> {dev.name} > [{dev.address}]")
+                else:
+                    logging.info(f"Other Device found! ====> {dev.name} > [{dev.address}]")
             self.stop()
         else:
             await self.ble_manager.connect()
