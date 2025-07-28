@@ -9,7 +9,7 @@ from .Utils import bytes_to_int, crc16_modbus, int_to_bytes
 # Should be extended by each client with its own parsers and section definitions
 # Section example: {'register': 5000, 'words': 8, 'parser': self.parser_func}
 
-ALIAS_PREFIXES = ['BT-TH', 'RNGRBP', 'BTRIC']
+ALIAS_PREFIXES = ['BT-TH', 'RNGRBP', 'BTRIC', 'RMTShunt300', 'Shunt300']
 WRITE_SERVICE_UUID = "0000ffd0-0000-1000-8000-00805f9b34fb"
 NOTIFY_CHAR_UUID = "0000fff1-0000-1000-8000-00805f9b34fb"
 WRITE_CHAR_UUID  = "0000ffd1-0000-1000-8000-00805f9b34fb"
