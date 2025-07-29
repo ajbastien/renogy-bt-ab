@@ -6,7 +6,7 @@ from renogybt import ShuntClient, DCChargerClient, InverterClient, RoverClient, 
 
 # Configure the logger
 logging.basicConfig(
-    filename='~/renogy.log',  # Specify the log file name
+    filename='renogy.log',  # Specify the log file name
     level=logging.DEBUG,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
     format='%(asctime)s - %(levelname)s - %(message)s' # Define the log message format
 )
