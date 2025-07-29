@@ -24,6 +24,7 @@ class BaseClient:
         self.device = None
         self.poll_timer = None
         self.read_timeout = None
+        self.is_running = False
         self.data = {}
         self.device_id = self.config['device'].getint('device_id')
         self.sections = []
@@ -33,6 +34,7 @@ class BaseClient:
 
     def start(self):
         try:
+            self.is_running = True
             self.loop = asyncio.get_event_loop()
             self.loop.create_task(self.connect())
             self.future = self.loop.create_future()
@@ -89,7 +91,7 @@ class BaseClient:
                 await asyncio.sleep(0.5)
                 await self.read_section()
         elif operation == 87: # notify operation for Shunt300
-            # logging.info("on_data_received: response for notify operation")
+            logging.info(f"BaseClient.on_data_received: response for notify operation {self.section_index} {len(self.sections)}")
             if (self.section_index < len(self.sections) and
                 self.sections[self.section_index]['parser'] != None and
                 self.sections[self.section_index]['words'] == len(response)):
@@ -146,6 +148,7 @@ class BaseClient:
         self.stop()
 
     def __on_connect_fail(self, error):
+        self.is_running = False
         logging.error(f"Connection failed: {error}")
         self.__safe_callback(self.on_error_callback, error)
         self.stop()

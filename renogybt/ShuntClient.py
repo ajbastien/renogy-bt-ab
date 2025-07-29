@@ -53,15 +53,16 @@ class ShuntClient(BaseClient):
         logging.info(f'ShuntClient.__init__ {self.G_NOTIFY_CHAR_UUID} {self.G_WRITE_SERVICE_UUID} {self.G_WRITE_CHAR_UUID} {self.G_READ_TIMEOUT}')
 
     async def on_data_received(self, response):
-        operation = bytes_to_int(response, 1, 1)
-        logging.info(f'ShuntClient.on_data_received {operation}')
-        if operation == 6: # write operation
-            self.parse_set_load_response(response)
-            self.on_write_operation_complete()
-            self.data = {}
-        else:
-            # read is handled in base class
-            await super().on_data_received(response)
+        logging.info(f'ShuntClient.on_data_received {operation} {self.is_running}')
+        if self.is_running:
+            operation = bytes_to_int(response, 1, 1)
+            if operation == 6: # write operation
+                self.parse_set_load_response(response)
+                self.on_write_operation_complete()
+                self.data = {}
+            else:
+                # read is handled in base class
+                await super().on_data_received(response)
 
     def on_write_operation_complete(self):
         logging.info("on_write_operation_complete")
@@ -99,5 +100,6 @@ class ShuntClient(BaseClient):
         # - consumed_amp_hours
         self.data.update(data)
         # logging.debug(msg=f"DATA: {self.data}")
+        logging.info(f'parse_shunt_info bs hex => {bs.hex()}')
         return data
         

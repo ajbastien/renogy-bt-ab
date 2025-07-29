@@ -44,7 +44,7 @@ class BLEManager:
             for service in self.client.services:
                 logging.info(f"service.uuid {service.uuid}")
                 for characteristic in service.characteristics:
-                    logging.info(f"characteristic.uuid {characteristic.uuid}")
+                    logging.info(f"   characteristic.uuid {characteristic.uuid}")
                     if characteristic.uuid == self.notify_char_uuid:
                         logging.info(f"subscribing to notification {characteristic.uuid}")
                         await self.client.start_notify(characteristic,  self.notification_callback)
