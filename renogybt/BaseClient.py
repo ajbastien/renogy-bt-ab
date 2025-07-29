@@ -149,7 +149,6 @@ class BaseClient:
         self.stop()
 
     def __on_connect_fail(self, error):
-        self.is_running = False
         logging.error(f"Connection failed: {error}")
         self.__safe_callback(self.on_error_callback, error)
         self.stop()
@@ -162,6 +161,7 @@ class BaseClient:
             self.future = self.loop.create_future()
             self.loop.run_until_complete(self.future)
         else:
+            self.is_running = False
             self.loop.create_task(self.disconnect())
 
     def __safe_callback(self, calback, param):

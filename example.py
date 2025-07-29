@@ -4,7 +4,12 @@ import os
 import sys
 from renogybt import ShuntClient, DCChargerClient, InverterClient, RoverClient, RoverHistoryClient, BatteryClient, DataLogger, Utils
 
-logging.basicConfig(level=logging.INFO)
+# Configure the logger
+logging.basicConfig(
+    filename='~/renogy.log',  # Specify the log file name
+    level=logging.DEBUG,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s' # Define the log message format
+)
 
 config_file = sys.argv[1] if len(sys.argv) > 1 else 'config.ini'
 config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), config_file)
