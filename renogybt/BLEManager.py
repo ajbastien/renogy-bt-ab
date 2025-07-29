@@ -40,17 +40,18 @@ class BLEManager:
             if not self.client.is_connected: return logging.error("Unable to connect")
 
             for service in self.client.services:
+                logging.info(f"service.uuid {service.uuid}")
                 for characteristic in service.characteristics:
                     logging.info(f"characteristic.uuid {characteristic.uuid}")
                     if characteristic.uuid == self.notify_char_uuid:
                         await self.client.start_notify(characteristic,  self.notification_callback)
                         logging.info(f"subscribed to notification {characteristic.uuid}")
-                    if characteristic.uuid == self.write_char_uuid and service.uuid == self.write_service_uuid:
+                    if self.write_char_uuid != "" and characteristic.uuid == self.write_char_uuid and service.uuid == self.write_service_uuid:
                         self.write_char_handle = characteristic.handle
                         logging.info(f"found write characteristic {characteristic.uuid}, service {service.uuid}")
 
-        except Exception:
-            logging.error(f"Error connecting to device")
+        except Exception as e:
+            logging.error(f"Error connecting to device {e}")
             self.connect_fail_callback(sys.exc_info())
 
     async def notification_callback(self, characteristic, data: bytearray):
@@ -58,13 +59,16 @@ class BLEManager:
         await self.data_callback(data)
 
     async def characteristic_write_value(self, data):
-        try:
-            logging.info(f'writing to {self.write_char_uuid} {data}')
-            await self.client.write_gatt_char(self.write_char_handle, bytearray(data), response=False)
-            logging.info('characteristic_write_value succeeded')
-            await asyncio.sleep(0.5)
-        except Exception as e:
-            logging.info(f'characteristic_write_value failed {e}')
+        if self.write_char_handle is not None:
+            try:
+                logging.info(f'writing to {self.write_char_uuid} {data}')
+                await self.client.write_gatt_char(self.write_char_handle, bytearray(data), response=False)
+                logging.info('characteristic_write_value succeeded')
+                await asyncio.sleep(0.5)
+            except Exception as e:
+                logging.info(f'characteristic_write_value failed {e}')
+        else:
+            logging.error(f'characteristic_write_value not called since write_char_handle is None')
 
     async def disconnect(self):
         if self.client and self.client.is_connected:

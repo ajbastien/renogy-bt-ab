@@ -37,7 +37,9 @@ class ShuntClient(BaseClient):
     def __init__(self, config, on_data_callback=None, on_error_callback=None):
         super().__init__(config)
         self.NOTIFY_CHAR_UUID = "0000c411-0000-1000-8000-00805f9b34fb"
-        self.WRITE_SERVICE_UUID = ""
+        self.WRITE_SERVICE_UUID = ""  # RMTShunt sends all data over notify to any connected device
+        self.WRITE_CHAR_UUID = ""  # RMTShunt sends all data over notify to any connected device
+        self.READ_TIMEOUT = 30 # (seconds)
         self.on_data_callback = on_data_callback
         self.on_error_callback = on_error_callback
         self.data = {}
@@ -45,9 +47,11 @@ class ShuntClient(BaseClient):
             {'register': 256, 'words': 110, 'parser': self.parse_shunt_info}
         ]
         self.set_load_params = {'function': 6, 'register': 266}
+        logging.info(f'ShuntClient.__init__ {self.NOTIFY_CHAR_UUID} {self.WRITE_SERVICE_UUID} {self.WRITE_CHAR_UUID} {self.READ_TIMEOUT}')
 
     async def on_data_received(self, response):
         operation = bytes_to_int(response, 1, 1)
+        logging.info(f'ShuntClient.on_data_received {operation}')
         if operation == 6: # write operation
             self.parse_set_load_response(response)
             self.on_write_operation_complete()
