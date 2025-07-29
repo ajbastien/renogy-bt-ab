@@ -20,12 +20,11 @@ class ShuntBaseClient(BaseClient):
         self.G_READ_TIMEOUT = 30 # (seconds)
 
     async def on_data_received(self, response):
-        logging.info(f"ShuntBaseClient.on_data_received: start")
         if self.read_timeout and not self.read_timeout.cancelled(): self.read_timeout.cancel()
         operation = bytes_to_int(response, 1, 1)
 
         if operation == 87: # notify operation for Shunt300
-            logging.info(f"ShuntBaseClient.on_data_received: response for notify operation {self.section_index} {len(self.sections)}")
+            #logging.info(f"ShuntBaseClient.on_data_received: response for notify operation {self.section_index} {len(self.sections)}")
             if (self.section_index < len(self.sections) and
                 self.sections[self.section_index]['parser'] != None and
                 self.sections[self.section_index]['words'] == len(response)):
