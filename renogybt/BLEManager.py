@@ -33,6 +33,8 @@ class BLEManager:
     async def connect(self):
         if not self.device: return logging.error("No device connected!")
 
+        logging.info(f'BLEManager.connect {self.notify_char_uuid} {self.write_service_uuid} {self.write_char_uuid}')
+
         self.client = BleakClient(self.device)
         try:
             await self.client.connect()
@@ -44,8 +46,8 @@ class BLEManager:
                 for characteristic in service.characteristics:
                     logging.info(f"characteristic.uuid {characteristic.uuid}")
                     if characteristic.uuid == self.notify_char_uuid:
+                        logging.info(f"subscribing to notification {characteristic.uuid}")
                         await self.client.start_notify(characteristic,  self.notification_callback)
-                        logging.info(f"subscribed to notification {characteristic.uuid}")
                     if self.write_char_uuid != "" and characteristic.uuid == self.write_char_uuid and service.uuid == self.write_service_uuid:
                         self.write_char_handle = characteristic.handle
                         logging.info(f"found write characteristic {characteristic.uuid}, service {service.uuid}")

@@ -10,15 +10,15 @@ from .Utils import bytes_to_int, crc16_modbus, int_to_bytes
 # Section example: {'register': 5000, 'words': 8, 'parser': self.parser_func}
 
 ALIAS_PREFIXES = ['BT-TH', 'RNGRBP', 'BTRIC', 'RTMShunt300', 'Shunt300', 'RNGRIU']
-WRITE_SERVICE_UUID = "0000ffd0-0000-1000-8000-00805f9b34fb"
-NOTIFY_CHAR_UUID = "0000fff1-0000-1000-8000-00805f9b34fb"
-WRITE_CHAR_UUID  = "0000ffd1-0000-1000-8000-00805f9b34fb"
-READ_TIMEOUT = 15 # (seconds)
 READ_SUCCESS = 3
 READ_ERROR = 131
 
 class BaseClient:
     def __init__(self, config):
+        self.G_WRITE_SERVICE_UUID = "0000ffd0-0000-1000-8000-00805f9b34fb"
+        self.G_NOTIFY_CHAR_UUID = "0000fff1-0000-1000-8000-00805f9b34fb"
+        self.G_WRITE_CHAR_UUID  = "0000ffd1-0000-1000-8000-00805f9b34fb"
+        self.G_READ_TIMEOUT = 15 # (seconds)
         self.config: configparser.ConfigParser = config
         self.ble_manager = None
         self.device = None
@@ -29,7 +29,7 @@ class BaseClient:
         self.sections = []
         self.section_index = 0
         self.loop = None
-        logging.info(f"Init {self.__class__.__name__}: {self.config['device']['alias']} => {self.config['device']['mac_addr']}")
+        logging.info(f"BaseClient.Init {self.__class__.__name__}: {self.config['device']['alias']} => {self.config['device']['mac_addr']}")
 
     def start(self):
         try:
@@ -44,7 +44,8 @@ class BaseClient:
             self.__on_error("KeyboardInterrupt")
 
     async def connect(self):
-        self.ble_manager = BLEManager(mac_address=self.config['device']['mac_addr'], alias=self.config['device']['alias'], on_data=self.on_data_received, on_connect_fail=self.__on_connect_fail, notify_char_uuid=NOTIFY_CHAR_UUID, write_char_uuid=WRITE_CHAR_UUID, write_service_uuid=WRITE_SERVICE_UUID)
+        logging.info(f'BaseClient.connect {self.G_NOTIFY_CHAR_UUID} {self.G_WRITE_SERVICE_UUID} {self.G_WRITE_CHAR_UUID} {self.G_READ_TIMEOUT}')
+        self.ble_manager = BLEManager(mac_address=self.config['device']['mac_addr'], alias=self.config['device']['alias'], on_data=self.on_data_received, on_connect_fail=self.__on_connect_fail, notify_char_uuid=self.G_NOTIFY_CHAR_UUID, write_char_uuid=self.G_WRITE_CHAR_UUID, write_service_uuid=self.G_WRITE_SERVICE_UUID)
         await self.ble_manager.discover()
 
         if not self.ble_manager.device:
@@ -110,7 +111,7 @@ class BaseClient:
         if self.device_id == None or len(self.sections) == 0:
             return logging.error("BaseClient cannot be used directly")
 
-        self.read_timeout = self.loop.call_later(READ_TIMEOUT, self.on_read_timeout)
+        self.read_timeout = self.loop.call_later(self.G_READ_TIMEOUT, self.on_read_timeout)
         request = self.create_generic_read_request(self.device_id, 3, self.sections[index]['register'], self.sections[index]['words']) 
         await self.ble_manager.characteristic_write_value(request)
 
