@@ -53,10 +53,12 @@ class ShuntClient(ShuntBaseClient):
 
     async def on_data_received(self, response):
         operation = bytes_to_int(response, 1, 1)
-        logging.info(f'ShuntClient.on_data_received {operation} {self.is_running} {time.perf_counter() - self.throttleTimer}')
-        if self.is_running and (time.perf_counter() - self.throttleTimer) > self.throttleTimerLen:  # The Smart Shunt sends many data requests, so we need to check if the client is running 
+        # The Smart Shunt sends many data requests, so we need to check if the client is running 
+        if self.is_running and (time.perf_counter() - self.throttleTimer) > self.throttleTimerLen:  
+            logging.info(f'ShuntClient.on_data_received {operation} {self.is_running} {time.perf_counter() - self.throttleTimer}')
+            self.throttleTimer = time.perf_counter()
+
             if operation == 6: # write operation
-                self.throttleTimer = time.perf_counter()
                 self.parse_set_load_response(response)
                 self.on_write_operation_complete()
                 self.data = {}

@@ -57,7 +57,7 @@ class BLEManager:
             self.connect_fail_callback(sys.exc_info())
 
     async def notification_callback(self, characteristic, data: bytearray):
-        logging.info("notification_callback")
+        #logging.info("notification_callback")
         await self.data_callback(data)
 
     async def characteristic_write_value(self, data):
