@@ -53,9 +53,9 @@ class ShuntClient(BaseClient):
         logging.info(f'ShuntClient.__init__ {self.G_NOTIFY_CHAR_UUID} {self.G_WRITE_SERVICE_UUID} {self.G_WRITE_CHAR_UUID} {self.G_READ_TIMEOUT}')
 
     async def on_data_received(self, response):
+        operation = bytes_to_int(response, 1, 1)
         logging.info(f'ShuntClient.on_data_received {operation} {self.is_running}')
         if self.is_running:
-            operation = bytes_to_int(response, 1, 1)
             if operation == 6: # write operation
                 self.parse_set_load_response(response)
                 self.on_write_operation_complete()

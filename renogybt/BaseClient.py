@@ -67,6 +67,7 @@ class BaseClient:
         self.future.set_result('DONE')
 
     async def on_data_received(self, response):
+        logging.info(f"BaseClient.on_data_received: start")
         if self.read_timeout and not self.read_timeout.cancelled(): self.read_timeout.cancel()
         operation = bytes_to_int(response, 1, 1)
 
