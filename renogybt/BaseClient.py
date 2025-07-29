@@ -15,10 +15,12 @@ READ_ERROR = 131
 
 class BaseClient:
     def __init__(self, config):
+        # Moved into class to allow override by subclasses
         self.G_WRITE_SERVICE_UUID = "0000ffd0-0000-1000-8000-00805f9b34fb"
         self.G_NOTIFY_CHAR_UUID = "0000fff1-0000-1000-8000-00805f9b34fb"
         self.G_WRITE_CHAR_UUID  = "0000ffd1-0000-1000-8000-00805f9b34fb"
         self.G_READ_TIMEOUT = 15 # (seconds)
+        
         self.config: configparser.ConfigParser = config
         self.ble_manager = None
         self.device = None
