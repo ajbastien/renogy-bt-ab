@@ -13,7 +13,7 @@ from .Utils import bytes_to_int, crc16_modbus, int_to_bytes
 class ShuntBaseClient(BaseClient):
     def __init__(self, config):
         super().__init__(config)
-
+        
         self.G_NOTIFY_CHAR_UUID = "0000c411-0000-1000-8000-00805f9b34fb"
         self.G_WRITE_SERVICE_UUID = ""  # RMTShunt sends all data over notify to any connected device
         self.G_WRITE_CHAR_UUID = ""  # RMTShunt sends all data over notify to any connected device
@@ -31,7 +31,14 @@ class ShuntBaseClient(BaseClient):
                 self.sections[self.section_index]['words'] == len(response)):
                 # parse and update data
                 self.data = self.sections[self.section_index]['parser'](response)
-                super().__safe_callback(self.on_data_callback, self.data)
+                self.__safe_callback(self.on_data_callback, self.data)
         else:
             logging.warning("on_data_received: unknown operation={}".format(operation))
 
+    def __safe_callback(self, calback, param):
+        if calback is not None:
+            try:
+                calback(self, param)
+            except Exception as e:
+                logging.error(f"__safe_callback => exception in callback! {e}")
+                traceback.print_exc()
