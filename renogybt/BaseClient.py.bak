@@ -24,7 +24,7 @@ class BaseClient:
         self.device = None
         self.poll_timer = None
         self.read_timeout = None
-        self.is_running = False # Used to signify if the client is currently running and can process data requests
+        self.is_running = False
         self.data = {}
         self.device_id = self.config['device'].getint('device_id')
         self.sections = []
@@ -34,6 +34,7 @@ class BaseClient:
 
     def start(self):
         try:
+            self.is_running = True
             self.loop = asyncio.get_event_loop()
             self.loop.create_task(self.connect())
             self.future = self.loop.create_future()
@@ -58,12 +59,10 @@ class BaseClient:
                     logging.info(f"Other Device found ====> {dev.name} > [{dev.address}]")
             self.stop()
         else:
-            self.is_running = True
             await self.ble_manager.connect()
             if self.ble_manager.client and self.ble_manager.client.is_connected: await self.read_section()
 
     async def disconnect(self):
-        self.is_running = False
         await self.ble_manager.disconnect()
         self.future.set_result('DONE')
 
@@ -92,6 +91,14 @@ class BaseClient:
                 self.section_index += 1
                 await asyncio.sleep(0.5)
                 await self.read_section()
+        elif operation == 87: # notify operation for Shunt300
+            logging.info(f"BaseClient.on_data_received: response for notify operation {self.section_index} {len(self.sections)}")
+            if (self.section_index < len(self.sections) and
+                self.sections[self.section_index]['parser'] != None and
+                self.sections[self.section_index]['words'] == len(response)):
+                # parse and update data
+                self.data = self.sections[self.section_index]['parser'](response)
+                self.__safe_callback(self.on_data_callback, self.data)
         else:
             logging.warning("on_data_received: unknown operation={}".format(operation))
 
@@ -154,6 +161,7 @@ class BaseClient:
             self.future = self.loop.create_future()
             self.loop.run_until_complete(self.future)
         else:
+            self.is_running = False
             self.loop.create_task(self.disconnect())
 
     def __safe_callback(self, calback, param):

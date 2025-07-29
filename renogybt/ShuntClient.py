@@ -1,6 +1,7 @@
 import asyncio
 import logging
-from .BaseClient import BaseClient
+import time
+from .ShuntBaseClient import ShuntBaseClient
 from .Utils import bytes_to_int, parse_temperature
 
 # Read and parse Smart Shunt 300
@@ -34,14 +35,12 @@ BATTERY_TYPE = {
 }
 
 
-class ShuntClient(BaseClient):
+class ShuntClient(ShuntBaseClient):
     def __init__(self, config, on_data_callback=None, on_error_callback=None):
         super().__init__(config)
 
-        self.G_NOTIFY_CHAR_UUID = "0000c411-0000-1000-8000-00805f9b34fb"
-        self.G_WRITE_SERVICE_UUID = ""  # RMTShunt sends all data over notify to any connected device
-        self.G_WRITE_CHAR_UUID = ""  # RMTShunt sends all data over notify to any connected device
-        self.G_READ_TIMEOUT = 30 # (seconds)
+        self.throttleTimerLen = self.config['data'].getint('poll_interval')
+        self.throttleTimer = time.perf_counter() - self.config['data'].getint('poll_interval') - 1
         self.on_data_callback = on_data_callback
         self.on_error_callback = on_error_callback
         self.data = {}
@@ -54,9 +53,10 @@ class ShuntClient(BaseClient):
 
     async def on_data_received(self, response):
         operation = bytes_to_int(response, 1, 1)
-        logging.info(f'ShuntClient.on_data_received {operation} {self.is_running}')
-        if self.is_running:
+        logging.info(f'ShuntClient.on_data_received {operation} {self.is_running} {time.perf_counter() - self.throttleTimer}')
+        if self.is_running and (time.perf_counter() - self.throttleTimer) > self.throttleTimerLen:  # The Smart Shunt sends many data requests, so we need to check if the client is running 
             if operation == 6: # write operation
+                self.throttleTimer = time.perf_counter()
                 self.parse_set_load_response(response)
                 self.on_write_operation_complete()
                 self.data = {}
