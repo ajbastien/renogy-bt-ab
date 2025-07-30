@@ -5,11 +5,12 @@ import sys
 from renogybt import ShuntClient, DCChargerClient, InverterClient, RoverClient, RoverHistoryClient, BatteryClient, DataLogger, Utils
 
 # Configure the logger
-logging.basicConfig(
-    filename='renogy.log',  # Specify the log file name
-    level=logging.INFO,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    format='%(asctime)s - %(levelname)s - %(message)s' # Define the log message format
-)
+logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(
+#    filename='renogy.log',  # Specify the log file name
+#    level=logging.INFO,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
+#    format='%(asctime)s - %(levelname)s - %(message)s' # Define the log message format
+#)
 
 config_file = sys.argv[1] if len(sys.argv) > 1 else 'config.ini'
 config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), config_file)
@@ -20,7 +21,7 @@ data_logger: DataLogger = DataLogger(config)
 # the callback func when you receive data
 def on_data_received(client, data, config):
     filtered_data = Utils.filter_fields(data, config['data']['fields'])
-    logging.info(f"{client.ble_manager.device.name} => {filtered_data}")
+    logging.warning(f"{client.ble_manager.device.name} => {filtered_data}")
     if config['remote_logging'].getboolean('enabled'):
         data_logger.log_remote(json_data=filtered_data)
     if config['mqtt'].getboolean('enabled'):

@@ -104,6 +104,6 @@ class ShuntClient(ShuntBaseClient):
         # - consumed_amp_hours
         self.data.update(data)
         # logging.debug(msg=f"DATA: {self.data}")
-        logging.info(f'parse_shunt_info bs hex => {bs.hex()}')
+        logging.warning(f'parse_shunt_info bs hex => {bs.hex()}')
         return data
         
