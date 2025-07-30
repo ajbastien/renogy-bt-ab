@@ -96,8 +96,8 @@ class ShuntClient(ShuntBaseClient):
         data['charge_amps'] = bytes_to_int(bs, 21, 3, scale = 0.001, signed=True) # 0xA4 (#1)
         data['charge_watts'] = round((data['main_battery_voltage'] * data['charge_amps']), 2)
         #data['temperature_1'] = 0.00 if bytes_to_int(bs, 67, 1) == 0 else bytes_to_int(bs, 66, 3, scale = 0.001) # 0xAD (#3)
-        data['temperature_1'] = format_temperature(bytes_to_int(bs, 66, 2, scale = 0.1), temp_unit) # 0xAD (#3)
-        data['temperature_2'] = 0.00 if bytes_to_int(bs, 71, 1) == 0 else bytes_to_int(bs, 70, 3, scale = 0.001) # 0xAD (#4)
+        data['battery_temperature'] = format_temperature(bytes_to_int(bs, 66, 2, scale = 0.1), temp_unit) # 0xAD (#3)
+        #data['temperature_2'] = 0.00 if bytes_to_int(bs, 71, 1) == 0 else bytes_to_int(bs, 70, 3, scale = 0.001) # 0xAD (#4)
         # unknown values:
         # - time_remaining
         # - discharge_duration
