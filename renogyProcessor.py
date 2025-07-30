@@ -2,6 +2,7 @@ import logging
 import configparser
 import os
 import sys
+import time
 from renogybt import ShuntClient, DCChargerClient, InverterClient, RoverClient, RoverHistoryClient, BatteryClient, DataLogger, Utils
 
 # Configure the logger
@@ -51,9 +52,40 @@ def process_config(config_file):
     else:
         logging.error("unknown device type")
 
+loopvalue = 0
 if len(sys.argv) > 1:
-
     for arg in sys.argv[1:]:
-        process_config(arg)
+        if arg.startswith('-l:'):
+            try:
+                loopvalue = int(arg[3:])
+            except ValueError:
+                print("Invalid loop value. Please provide a valid integer.")
+                sys.exit(1)
+        elif os.path.isfile(arg):
+            process_config(arg)
+        else:
+            print(f"File not found: {arg}")
+            sys.exit(1)
 
+    try:
+        while loopvalue > 0:
+            for arg in sys.argv[1:]:
+                if arg.startswith('-l:'):
+                    try:
+                        loopvalue = int(arg[3:])
+                    except ValueError:
+                        print("Invalid loop value. Please provide a valid integer.")
+                        sys.exit(1)
+                elif os.path.isfile(arg):
+                    process_config(arg)
+                else:
+                    print(f"File not found: {arg}")
+                    sys.exit(1)
+            time.sleep(loopvalue)
+    except KeyboardInterrupt:
+        print("\nCtrl+C detected. Performing cleanup...")
+
+else:
+    print("Usage: <options> python renogyProcessor.py <config_file1> <config_file2> ...")
+    print("   Options: -l:nn (loop every nn secs)")
 
