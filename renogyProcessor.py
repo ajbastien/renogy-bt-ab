@@ -15,7 +15,6 @@ def process_config(config_file):
     config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), config_file)
     config = configparser.ConfigParser(inline_comment_prefixes=('#'))
     config.read(config_path)
-    data_logger: DataLogger = DataLogger(config)
 
     # start client
     if config['device']['type'] == 'RNG_CTRL':
@@ -41,6 +40,7 @@ if len(sys.argv) > 1:
 
 # the callback func when you receive data
 def on_data_received(client, data, config):
+    data_logger: DataLogger = DataLogger(config)
     filtered_data = Utils.filter_fields(data, config['data']['fields'])
     logging.info(f"{client.ble_manager.device.name} => {filtered_data}")
     if config['remote_logging'].getboolean('enabled'):
