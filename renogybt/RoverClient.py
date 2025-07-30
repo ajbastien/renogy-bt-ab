@@ -60,7 +60,7 @@ class RoverClient(BaseClient):
     def on_write_operation_complete(self):
         logging.info("on_write_operation_complete")
         if self.on_data_callback is not None:
-            self.on_data_callback(self, self.data)
+            self.on_data_callback(self, self.data, self.config)
 
     def set_load(self, value = 0):
         logging.info("setting load {}".format(value))

@@ -11,11 +11,33 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s' # Define the log message format
 )
 
-config_file = sys.argv[1] if len(sys.argv) > 1 else 'config.ini'
-config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), config_file)
-config = configparser.ConfigParser(inline_comment_prefixes=('#'))
-config.read(config_path)
-data_logger: DataLogger = DataLogger(config)
+def process_config(config_file):
+    config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), config_file)
+    config = configparser.ConfigParser(inline_comment_prefixes=('#'))
+    config.read(config_path)
+    data_logger: DataLogger = DataLogger(config)
+
+    # start client
+    if config['device']['type'] == 'RNG_CTRL':
+        RoverClient(config, on_data_received, on_error).start()
+    elif config['device']['type'] == 'RNG_CTRL_HIST':
+        RoverHistoryClient(config, on_data_received, on_error).start()
+    elif config['device']['type'] == 'RNG_BATT':
+        BatteryClient(config, on_data_received, on_error).start()
+    elif config['device']['type'] == 'RNG_INVT':
+        InverterClient(config, on_data_received, on_error).start()
+    elif config['device']['type'] == 'RNG_DCC':
+        DCChargerClient(config, on_data_received, on_error).start()
+    elif config['device']['type'] == 'RNG_SHNT':
+        ShuntClient(config, on_data_received, on_error).start()
+    else:
+        logging.error("unknown device type")
+
+if len(sys.argv) > 1:
+
+    for arg in sys.argv[1:]:
+        process_config(arg)
+
 
 # the callback func when you receive data
 def on_data_received(client, data, config):
@@ -34,18 +56,3 @@ def on_data_received(client, data, config):
 def on_error(client, error):
     logging.error(f"on_error: {error}")
 
-# start client
-if config['device']['type'] == 'RNG_CTRL':
-    RoverClient(config, on_data_received, on_error).start()
-elif config['device']['type'] == 'RNG_CTRL_HIST':
-    RoverHistoryClient(config, on_data_received, on_error).start()
-elif config['device']['type'] == 'RNG_BATT':
-    BatteryClient(config, on_data_received, on_error).start()
-elif config['device']['type'] == 'RNG_INVT':
-    InverterClient(config, on_data_received, on_error).start()
-elif config['device']['type'] == 'RNG_DCC':
-    DCChargerClient(config, on_data_received, on_error).start()
-elif config['device']['type'] == 'RNG_SHNT':
-    ShuntClient(config, on_data_received, on_error).start()
-else:
-    logging.error("unknown device type")

@@ -30,14 +30,14 @@ class ShuntBaseClient(BaseClient):
                 self.sections[self.section_index]['words'] == len(response)):
                 # parse and update data
                 self.data = self.sections[self.section_index]['parser'](response)
-                self.__safe_callback(self.on_data_callback, self.data)
+                self.__safe_callback(self.on_data_callback, self.data, self.config)
         else:
             logging.warning("on_data_received: unknown operation={}".format(operation))
 
-    def __safe_callback(self, calback, param):
+    def __safe_callback(self, calback, param, param2=None):
         if calback is not None:
             try:
-                calback(self, param)
+                calback(self, param, param2)
             except Exception as e:
                 logging.error(f"__safe_callback => exception in callback! {e}")
                 traceback.print_exc()

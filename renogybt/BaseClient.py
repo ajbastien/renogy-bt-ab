@@ -20,7 +20,7 @@ class BaseClient:
         self.G_NOTIFY_CHAR_UUID = "0000fff1-0000-1000-8000-00805f9b34fb"
         self.G_WRITE_CHAR_UUID  = "0000ffd1-0000-1000-8000-00805f9b34fb"
         self.G_READ_TIMEOUT = 15 # (seconds)
-        
+
         self.config: configparser.ConfigParser = config
         self.ble_manager = None
         self.device = None
@@ -101,7 +101,7 @@ class BaseClient:
         logging.info("on_read_operation_complete")
         self.data['__device'] = self.config['device']['alias']
         self.data['__client'] = self.__class__.__name__
-        self.__safe_callback(self.on_data_callback, self.data)
+        self.__safe_callback(self.on_data_callback, self.data, self.config)
 
     def on_read_timeout(self):
         logging.error("on_read_timeout => Timed out! Please check your device_id!")
@@ -158,10 +158,10 @@ class BaseClient:
         else:
             self.loop.create_task(self.disconnect())
 
-    def __safe_callback(self, calback, param):
+    def __safe_callback(self, calback, param, param2=None):
         if calback is not None:
             try:
-                calback(self, param)
+                calback(self, param, param2)
             except Exception as e:
                 logging.error(f"__safe_callback => exception in callback! {e}")
                 traceback.print_exc()
