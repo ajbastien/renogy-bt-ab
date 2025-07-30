@@ -90,6 +90,7 @@ class ShuntClient(ShuntBaseClient):
     def parse_shunt_info(self, bs):
         data = {}
         #temp_unit = self.config['data']['temperature_unit']
+        data['charge_battery_percent'] = bytes_to_int(bs, 34, 2, scale = 0.1) # 0xA6 (#1)
         data['charge_battery_voltage'] = bytes_to_int(bs, 25, 3, scale = 0.001) # 0xA6 (#1)
         data['starter_battery_voltage'] = bytes_to_int(bs, 30, 2, scale = 0.001) # 0xA6 (#2)
         data['discharge_amps'] = bytes_to_int(bs, 21, 3, scale = 0.001, signed=True) # 0xA4 (#1)
