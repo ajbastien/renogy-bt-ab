@@ -56,39 +56,39 @@ def process_config(config_file):
         logging.error("unknown device type")
 
 loopvalue = 0
-if len(sys.argv) > 1:
-    for arg in sys.argv[1:]:
-        if arg.startswith('-l:'):
-            try:
-                loopvalue = int(arg[3:])
-            except ValueError:
-                print("Invalid loop value. Please provide a valid integer.")
-                sys.exit(1)
-        elif os.path.isfile(arg):
-            process_config(arg)
-        else:
-            print(f"File not found: {arg}")
-            sys.exit(1)
+loopcount = 1  # -1 means infinite loop
+count = 1
 
+if len(sys.argv) > 1:
     try:
-        while loopvalue > 0:
+        while loopcount < 0 or count <= loopcount:
             for arg in sys.argv[1:]:
-                if arg.startswith('-l:'):
+                if arg.startswith('-lt:'):
                     try:
-                        loopvalue = int(arg[3:])
+                        loopvalue = int(arg[4:])
                     except ValueError:
                         print("Invalid loop value. Please provide a valid integer.")
+                        sys.exit(1)
+                elif arg.startswith('-lc:'):
+                    try:
+                        loopcount = int(arg[4:])
+                    except ValueError:
+                        print("Invalid loop count. Please provide a valid integer.")
                         sys.exit(1)
                 elif os.path.isfile(arg):
                     process_config(arg)
                 else:
                     print(f"File not found: {arg}")
                     sys.exit(1)
+
             time.sleep(loopvalue)
+            count += 1
+
     except KeyboardInterrupt:
         print("\nCtrl+C detected. Performing cleanup...")
 
 else:
     print("Usage: <options> python renogyProcessor.py <config_file1> <config_file2> ...")
-    print("   Options: -l:nn (loop every nn secs)")
+    print("   Options: -lt:nn (loop every nn secs)")
+    print("            -lc:nn (max number of loops)")
 
