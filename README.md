@@ -61,6 +61,11 @@ DEBUG:root:BTRIC13400XXXX => {'function': 'READ', 'input_voltage': 124.9, 'input
 INFO:root:BT-TH-XXXXXXXX => {'function': 'READ', 'model': 'RBC50D1S-G1', 'device_id': 96, 'battery_percentage': 100, 'battery_voltage': 13.2, 'combined_charge_current': 0.0, 'controller_temperature': 18, 'battery_temperature': 25, 'alternator_voltage': 12.9, 'alternator_current': 0.0, 'alternator_power': 0, 'pv_voltage': 0.0, 'pv_current': 0.0, 'pv_power': 0, 'battery_min_voltage_today': 13.2, 'battery_max_voltage_today': 13.3, 'battery_max_current_today': 17.02, 'max_charging_power_today': 238, 'charging_amp_hours_today': 25, 'power_generation_today': 336, 'total_working_days': 703, 'count_battery_overdischarged': 0, 'count_battery_fully_charged': 1435, 'battery_ah_total_accumulated': 5607, 'power_generation_total': 76580, 'charging_status': 'current limiting', 'error': 'battery_over_discharge', 'battery_type': None, '__device': 'BT-TH-XXXXXXXX', '__client': 'DCChargerClient'}
 ```
 
+```
+# Shunt output
+{"main_battery_percent": 100.0, "main_battery_voltage": 14.61, "starter_battery_voltage": 12.82, "charge_amps": 0.02, "charge_watts": 0.29, "battery_temperature": 19.9}
+```
+
 **Have multiple devices in Hub mode?**
 
 If you have multiple devices connected to a single BT-2 module (daisy chained or using [Communication Hub](https://www.renogy.com/communication-hub/)), you need to find out the individual device Id (aka address) of each of these devices. Below are some of the usual suspects:
@@ -85,8 +90,8 @@ If you have multiple devices connected to a single BT-2 module (daisy chained or
 | Renogy RBT100LFP12-BT / RBT200LFP12-BT (Built-in BLE) | Battery | - | ✅ |
 | Renogy RBT12100LFP-BT / RBT12200LFP-BT (Pro Series) | Battery | - | ✅ |
 | Renogy RIV4835CSH1S | Inverter | BT-2 | ✅ |
-| Renogy Rego RIV1230RCH (Built-in BLE) | Inverter | - | ✅ |
-| Renogy Smart Shunt | Shunt | - | ❌ |
+| Renogy Rego RIV1230RCH/RIV1220PU | Inverter | Built-in BLE | ✅ |
+| Renogy Smart Shunt RSHST-B02P300 | Shunt | Built-in BLE | ✅ |
 
 ## Data logging
 
@@ -137,6 +142,7 @@ If you want to monitor real-time data, turn on polling in `config.ini` for conti
 
 ## References
 
+ - [Cyrils Base ](https://github.com/cyrils/renogy-bt)
  - [Olen/solar-monitor](https://github.com/Olen/solar-monitor)
  - [corbinbs/solarshed](https://github.com/corbinbs/solarshed)
  - [Renogy modbus documentation](https://github.com/cyrils/renogy-bt/discussions/94)
