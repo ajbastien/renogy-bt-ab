@@ -37,7 +37,12 @@ class ShuntBaseClient(BaseClient):
     def __safe_callback(self, calback, param, param2=None):
         if calback is not None:
             try:
-                calback(self, param, param2)
+                if param2 is None:
+                    # If only one parameter is passed, call the callback with just that parameter
+                    calback(self, param)
+                else:
+                    # If two parameters are passed, call the callback with both
+                    calback(self, param, param2)
             except Exception as e:
                 logging.error(f"__safe_callback => exception in callback! {e}")
                 traceback.print_exc()
