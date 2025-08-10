@@ -1,7 +1,7 @@
 import asyncio
 import configparser
-import logging
 import traceback
+from logger_config import logger
 from .BaseClient import BaseClient
 from .BLEManager import BLEManager
 from .Utils import bytes_to_int, crc16_modbus, int_to_bytes
@@ -20,19 +20,22 @@ class ShuntBaseClient(BaseClient):
         self.G_READ_TIMEOUT = 30 # (seconds)
 
     async def on_data_received(self, response):
-        if self.read_timeout and not self.read_timeout.cancelled(): self.read_timeout.cancel()
+        logger.info("ShuntBaseCLient on_data_received")
         operation = bytes_to_int(response, 1, 1)
+        if self.read_timeout and not self.read_timeout.cancelled(): self.read_timeout.cancel()
 
         if operation == 87: # notify operation for Shunt300
-            #logging.info(f"ShuntBaseClient.on_data_received: response for notify operation {self.section_index} {len(self.sections)}")
+            logger.info(f"ShuntBaseClient.on_data_received: response for notify operation {self.section_index} {len(self.sections)}")
             if (self.section_index < len(self.sections) and
                 self.sections[self.section_index]['parser'] != None and
                 self.sections[self.section_index]['words'] == len(response)):
+
                 # parse and update data
                 self.data = self.sections[self.section_index]['parser'](response)
                 self.__safe_callback(self.on_data_callback, self.data, self.config)
+                if self.discovery_timeout and not self.discovery_timeout.cancelled(): self.discovery_timeout.cancel() #only cancel on successful process
         else:
-            logging.warning("on_data_received: unknown operation={}".format(operation))
+            logger.warning("on_data_received: unknown operation={}".format(operation))
 
     def __safe_callback(self, calback, param, param2=None):
         if calback is not None:
@@ -44,5 +47,5 @@ class ShuntBaseClient(BaseClient):
                     # If two parameters are passed, call the callback with both
                     calback(self, param, param2)
             except Exception as e:
-                logging.error(f"__safe_callback => exception in callback! {e}")
+                logger.error(f"__safe_callback => exception in callback! {e}")
                 traceback.print_exc()

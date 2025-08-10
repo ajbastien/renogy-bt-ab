@@ -1,23 +1,18 @@
-import logging
 import configparser
 import os
 import sys
 import time
+from logger_config import logger
 from renogybt import ShuntClient, DCChargerClient, InverterClient, RoverClient, RoverHistoryClient, BatteryClient, DataLogger, Utils
 
 # Configure the logger
-logging.basicConfig(level=logging.WARNING)
-#logging.basicConfig(
-#    filename='renogy.log',  # Specify the log file name
-#    level=logging.INFO,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
-#    format='%(asctime)s - %(levelname)s - %(message)s' # Define the log message format
-#)
+#logging.basicConfig(level=logging.INFO)
 
 # the callback func when you receive data
 def on_data_received(client, data, config):
     data_logger: DataLogger = DataLogger(config)
     filtered_data = Utils.filter_fields(data, config['data']['fields'])
-    logging.warning(f"{client.ble_manager.device.name} => {filtered_data}")
+    logger.warning(f"{client.ble_manager.device.name} => {filtered_data}")
     if config['remote_logging'].getboolean('enabled'):
         data_logger.log_remote(json_data=filtered_data)
     if config['mqtt'].getboolean('enabled'):
@@ -28,8 +23,8 @@ def on_data_received(client, data, config):
         client.stop()
 
 # error callback
-def on_error(client, error):
-    logging.error(f"on_error: {error}")
+def on_error(client, error, param2=None):  #added param2 to avoid error?
+    logger.error(f"on_error: {error}")
 
 # Process the configuration file
 def process_config(config_file):
@@ -37,7 +32,7 @@ def process_config(config_file):
     config = configparser.ConfigParser(inline_comment_prefixes=('#'))
     config.read(config_path)
 
-    logging.warning(f"Processing {config_file}...")
+    logger.warning(f"Processing {config_file}...")
 
     # start client
     if config['device']['type'] == 'RNG_CTRL':
@@ -77,12 +72,16 @@ if len(sys.argv) > 1:
                         sys.exit(1)
                 elif os.path.isfile(arg):
                     process_config(arg)
+                    logger.info("Sleeping for {} seconds...".format(10))
+                    time.sleep(10)  # wait for 10 seconds before next loop
                 else:
                     print(f"File not found: {arg}")
                     sys.exit(1)
 
-            time.sleep(loopvalue)
             count += 1
+            #if count <= loopcount:
+            logger.info("Sleeping for {} seconds...".format(loopvalue))
+            time.sleep(loopvalue)
 
     except KeyboardInterrupt:
         print("\nCtrl+C detected. Performing cleanup...")

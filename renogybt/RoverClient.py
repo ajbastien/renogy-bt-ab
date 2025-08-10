@@ -1,5 +1,5 @@
 import asyncio
-import logging
+from logger_config import logger
 from .BaseClient import BaseClient
 from .Utils import bytes_to_int, parse_temperature
 
@@ -58,12 +58,12 @@ class RoverClient(BaseClient):
             await super().on_data_received(response)
 
     def on_write_operation_complete(self):
-        logging.info("on_write_operation_complete")
+        logger.info("on_write_operation_complete")
         if self.on_data_callback is not None:
             self.on_data_callback(self, self.data, self.config)
 
     def set_load(self, value = 0):
-        logging.info("setting load {}".format(value))
+        logger.info("setting load {}".format(value))
         request = self.create_generic_read_request(self.device_id, self.set_load_params["function"], self.set_load_params["register"], value)
         asyncio.create_task(self.ble_manager.characteristic_write_value(request))
 

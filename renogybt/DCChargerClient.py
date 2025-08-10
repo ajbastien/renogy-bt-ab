@@ -1,4 +1,4 @@
-import logging
+from logger_config import logger
 from .BaseClient import BaseClient
 from .Utils import bytes_to_int, parse_temperature
 

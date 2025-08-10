@@ -1,6 +1,6 @@
 import asyncio
-import logging
 import time
+from logger_config import logger
 from .ShuntBaseClient import ShuntBaseClient
 from .Utils import bytes_to_int, parse_temperature, format_temperature
 
@@ -49,13 +49,14 @@ class ShuntClient(ShuntBaseClient):
         ]
         self.set_load_params = {'function': 6, 'register': 266}
 
-        #logging.info(f'ShuntClient.__init__ {self.G_NOTIFY_CHAR_UUID} {self.G_WRITE_SERVICE_UUID} {self.G_WRITE_CHAR_UUID} {self.G_READ_TIMEOUT}')
+        #logger.info(f'ShuntClient.__init__ {self.G_NOTIFY_CHAR_UUID} {self.G_WRITE_SERVICE_UUID} {self.G_WRITE_CHAR_UUID} {self.G_READ_TIMEOUT}')
 
     async def on_data_received(self, response):
+        logger.info("on_data_receive")
         operation = bytes_to_int(response, 1, 1)
         # The Smart Shunt sends many data requests, so we need to check if the client is running 
         if self.is_running and (time.perf_counter() - self.throttleTimer) > self.throttleTimerLen:  
-            #logging.info(f'ShuntClient.on_data_received {operation} {self.is_running} {time.perf_counter() - self.throttleTimer}')
+            logger.info(f'ShuntClient.on_data_received {operation} {self.is_running} {time.perf_counter() - self.throttleTimer}')
             self.throttleTimer = time.perf_counter()
 
             if operation == 6: # write operation
@@ -67,12 +68,12 @@ class ShuntClient(ShuntBaseClient):
                 await super().on_data_received(response)
 
     def on_write_operation_complete(self):
-        #logging.info("on_write_operation_complete")
+        #logger.info("on_write_operation_complete")
         if self.on_data_callback is not None:
             self.on_data_callback(self, self.data, self.config)
 
     def set_load(self, value = 0):
-        #logging.info("setting load {}".format(value))
+        #logger.info("setting load {}".format(value))
         request = self.create_generic_read_request(self.device_id, self.set_load_params["function"], self.set_load_params["register"], value)
         asyncio.create_task(self.ble_manager.characteristic_write_value(request))
 
@@ -103,7 +104,7 @@ class ShuntClient(ShuntBaseClient):
         # - discharge_duration
         # - consumed_amp_hours
         self.data.update(data)
-        # logging.debug(msg=f"DATA: {self.data}")
-        logging.warning(f'parse_shunt_info bs hex => {bs.hex()}')
+        # logger.debug(msg=f"DATA: {self.data}")
+        logger.warning(f'parse_shunt_info bs hex => {bs.hex()}')
         return data
         
