@@ -5,9 +5,6 @@ import time
 from logger_config import logger
 from renogybt import ShuntClient, DCChargerClient, InverterClient, RoverClient, RoverHistoryClient, BatteryClient, DataLogger, Utils
 
-# Configure the logger
-#logging.basicConfig(level=logging.INFO)
-
 # the callback func when you receive data
 def on_data_received(client, data, config):
     data_logger: DataLogger = DataLogger(config)
@@ -48,7 +45,7 @@ def process_config(config_file):
     elif config['device']['type'] == 'RNG_SHNT':
         ShuntClient(config, on_data_received, on_error).start()
     else:
-        logging.error("unknown device type")
+        logger.error("unknown device type")
 
 loopvalue = 0
 loopcount = 1  # -1 means infinite loop

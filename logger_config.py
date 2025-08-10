@@ -4,7 +4,7 @@ from logging.handlers import RotatingFileHandler
 
 def setup_shared_logger():
     logger = logging.getLogger('shared_app_logger')
-    logger.setLevel(logging.DEBUG) # Set desired logging level
+    logger.setLevel(logging.INFO) # Set desired logging level
 
     # Prevent adding multiple handlers if the function is called multiple times
     if not logger.handlers:
