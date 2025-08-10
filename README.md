@@ -128,13 +128,37 @@ if ($headers['Authorization'] != "Bearer 123456789") {
 $json_data = json_decode(file_get_contents('php://input'), true);
 ```
 
-**How to get continues output?**
+## How to get continuous output?**
+
+### Cron
 
  The best way to get continues data is to schedule a cronjob by running `crontab -e` and insert the following command:
 ```sh
 */5 * * * * python3 /path/to/renogy-bt/example.py config.ini #runs every 5 mins
 ```
-If you want to monitor real-time data, turn on polling in `config.ini` for continues streaming (default interval is 60 secs). You may also register it as a [service](https://github.com/cyrils/renogy-bt/issues/77) for added reliability.
+If you want to monitor real-time data, turn on polling in `config.ini` for continues streaming (default interval is 60 secs). 
+
+### System Control Service
+
+You may also register it as a [service] with System Control (https://github.com/cyrils/renogy-bt/issues/77) for added reliability.  The following example uses the renogyProcessor.py.  This processor will loop over multiple config files and process them one by one with a 10 second delay between.  You can also have it loop over the files multiple times. In the below example (I use this on a Pi Zero W) I loop only twice with 5 minute sleeps in the loop and then exit.  The service will automatically be restarted.  This setup seems to run fine so far for me.  I also use the logger_config.py and point the log to my home directory for easy tailing.
+
+Here is example of the service file:
+```
+[Unit]
+Description=Renogy Monitoring
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/projects/renogy-bt/renogyProcessor.py -lt:300 -lc:2 /home/pi/configShunt.ini /home/pi/configDC.ini
+WorkingDirectory=/home/pi/projects/renogy-bt/
+Restart=always
+User=pi
+Group=1000
+
+[Install]
+WantedBy=multi-user.target
+```
+
 
 ### Disclaimer
 
