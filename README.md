@@ -171,3 +171,5 @@ WantedBy=multi-user.target
  - [corbinbs/solarshed](https://github.com/corbinbs/solarshed)
  - [Renogy modbus documentation](https://github.com/cyrils/renogy-bt/discussions/94)
  - [mavenius/renogy-bt-esphome](//github.com/mavenius/renogy-bt-esphome) - ESPHome port of this project
+ - https://github.com/antflix/ha_renogy_smart_shunt for providing the Shunt parsing and the understanding that it is different from the other devices
+ - 
